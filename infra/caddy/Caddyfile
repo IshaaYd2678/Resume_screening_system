@@ -1,0 +1,47 @@
+# Caddy reverse proxy configuration
+# Auto-HTTPS with local certificates
+
+localhost, *.localhost {
+    # API backend
+    reverse_proxy /api/* http://api:8000 {
+        # Keep connection alive
+        header_up Connection "Upgrade"
+        header_up Upgrade "websocket"
+    }
+    
+    # Frontend
+    reverse_proxy /* http://frontend:3000 {
+        header_up Host {http.request.header.Host}
+    }
+    
+    # Enable compression
+    encode gzip
+    
+    # Security headers
+    header /* {
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+}
+
+# MinIO console (if needed)
+:9001 {
+    reverse_proxy http://minio:9001
+}
+
+# Prometheus
+:9090 {
+    reverse_proxy http://prometheus:9090
+}
+
+# Grafana
+:3001 {
+    reverse_proxy http://grafana:3000
+}
+
+# Jaeger
+:16686 {
+    reverse_proxy http://jaeger:16686
+}

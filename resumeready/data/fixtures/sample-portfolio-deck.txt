@@ -1,0 +1,12 @@
+Slide 1: Jordan Lee product case study portfolio
+Slide 2: Customer onboarding redesign for B2B SaaS platform
+Slide 3: Problem - activation lagged because setup tasks were split across five disconnected screens
+Slide 4: Process - interviewed 18 admins, mapped friction points, and prioritized a guided setup flow
+Slide 5: Solution - launched checklist navigation, contextual help, and role-based defaults
+Slide 6: Outcome - day-14 activation increased from 58 percent to 71 percent and support tickets dropped 19 percent
+Slide 7: Pricing packaging experiment for enterprise segment
+Slide 8: Problem - sales cycle length increased because buyers struggled to compare plan options
+Slide 9: Process - partnered with revenue operations, tested three packaging concepts, and validated messaging with ten prospects
+Slide 10: Outcome - proposal-to-close time improved by 16 percent and average contract value increased 9 percent
+Slide 11: Visual system - consistent headings, outcome callouts, and clear before-and-after comparisons
+Slide 12: Contact - jordanlee.dev, GitHub, LinkedIn

@@ -1,0 +1,33 @@
+# Git and env
+.git
+.gitignore
+.env
+.env.*
+*.env
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv
+venv
+ENV
+
+# Test and dev
+.pytest_cache
+.coverage
+htmlcov
+*.egg-info
+.eggs
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Docs and misc
+*.md
+!README.md

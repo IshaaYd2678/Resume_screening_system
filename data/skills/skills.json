@@ -1,0 +1,92 @@
+[
+  {
+    "id": "skill_001",
+    "label": "Python",
+    "category": "Programming Languages",
+    "altLabels": ["Python 3", "Python programming"]
+  },
+  {
+    "id": "skill_002",
+    "label": "JavaScript",
+    "category": "Programming Languages",
+    "altLabels": ["JS", "ECMAScript"]
+  },
+  {
+    "id": "skill_003",
+    "label": "React",
+    "category": "Frontend Frameworks",
+    "altLabels": ["ReactJS", "React.js"]
+  },
+  {
+    "id": "skill_004",
+    "label": "FastAPI",
+    "category": "Backend Frameworks",
+    "altLabels": ["Fast API"]
+  },
+  {
+    "id": "skill_005",
+    "label": "Django",
+    "category": "Backend Frameworks",
+    "altLabels": ["Django REST Framework"]
+  },
+  {
+    "id": "skill_006",
+    "label": "PostgreSQL",
+    "category": "Databases",
+    "altLabels": ["Postgres", "PostgreSQL database"]
+  },
+  {
+    "id": "skill_007",
+    "label": "MongoDB",
+    "category": "Databases",
+    "altLabels": ["Mongo", "NoSQL"]
+  },
+  {
+    "id": "skill_008",
+    "label": "Docker",
+    "category": "DevOps/Containerization",
+    "altLabels": ["Docker containers", "Containerization"]
+  },
+  {
+    "id": "skill_009",
+    "label": "Kubernetes",
+    "category": "Orchestration",
+    "altLabels": ["k8s", "K8s", "Kubernetes orchestration"]
+  },
+  {
+    "id": "skill_010",
+    "label": "AWS",
+    "category": "Cloud Platforms",
+    "altLabels": ["Amazon Web Services", "AWS Cloud"]
+  },
+  {
+    "id": "skill_011",
+    "label": "Machine Learning",
+    "category": "Data Science",
+    "altLabels": ["ML", "Deep Learning"]
+  },
+  {
+    "id": "skill_012",
+    "label": "Natural Language Processing",
+    "category": "AI/ML",
+    "altLabels": ["NLP", "Text Processing"]
+  },
+  {
+    "id": "skill_013",
+    "label": "Git",
+    "category": "Version Control",
+    "altLabels": ["GitHub", "GitLab"]
+  },
+  {
+    "id": "skill_014",
+    "label": "REST API",
+    "category": "API Design",
+    "altLabels": ["RESTful", "REST", "API"]
+  },
+  {
+    "id": "skill_015",
+    "label": "SQL",
+    "category": "Databases",
+    "altLabels": ["SQL queries", "Database query language"]
+  }
+]

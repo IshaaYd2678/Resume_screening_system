@@ -1,0 +1,47 @@
+global:
+  parse_log_level: info
+
+auth:
+  - usr: admin
+    pass: admin
+
+server:
+  http_listen_addr: 0.0.0.0:3100
+  log_level: info
+
+ingester:
+  max_chunk_age: 2m
+  chunk_idle_period: 2m
+  max_chunk_size: 10485760
+  max_streams_limit_per_user: 10000
+
+limits_config:
+  max_cache_freshness_per_query: 10m
+  max_streams_limit_per_user: 10000
+  enforce_metric_name: false
+  reject_old_samples: false
+
+schema_config:
+  configs:
+  - from: 2020-10-24
+    store: boltdb-shipper
+    object_store: filesystem
+    schema: v11
+    index:
+      prefix: index_
+      period: 24h
+
+storage_config:
+  boltdb_shipper:
+    active_index_directory: /loki/boltdb-shipper-active
+    cache_location: /loki/boltdb-shipper-cache
+    shared_store: filesystem
+  filesystem:
+    directory: /loki/chunks
+
+chunk_store_config:
+  max_look_back_period: 0s
+
+table_manager:
+  retention_deletes_enabled: false
+  retention_period: 0s

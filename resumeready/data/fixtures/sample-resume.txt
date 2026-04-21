@@ -1,0 +1,30 @@
+Maya Patel
+Product Analyst
+maya.patel@example.com | Austin, TX | linkedin.com/in/mayapatel
+
+Summary
+Product analyst with 4 years of experience improving onboarding, activation, and retention for B2B SaaS teams. Strong background in SQL, dashboard design, experimentation, and stakeholder communication.
+
+Experience
+Product Analyst, Northstar Labs
+June 2022 - Present
+- Built weekly activation dashboard used by product, sales, and customer success teams.
+- Partnered with PMs to identify onboarding friction and improve trial-to-paid conversion by 12%.
+- Designed A/B test readouts for three onboarding experiments across 40,000 users.
+- Created self-serve reporting templates that reduced ad hoc analytics requests by 30%.
+
+Data Analyst, BrightCart
+January 2020 - May 2022
+- Wrote SQL queries to monitor marketplace supply health and customer purchase patterns.
+- Automated recurring revenue reporting, saving finance teams 6 hours per month.
+- Presented monthly insights to leadership on churn drivers and expansion opportunities.
+
+Education
+University of Texas at Austin
+Bachelor of Business Administration, Information Systems
+
+Skills
+SQL, Tableau, Looker, Excel, Python, A/B testing, funnel analysis, cohort analysis, stakeholder management
+
+Certifications
+Google Data Analytics Certificate

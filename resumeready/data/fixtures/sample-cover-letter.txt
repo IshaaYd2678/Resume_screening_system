@@ -1,0 +1,9 @@
+Dear Hiring Team,
+
+I am excited to apply for the Product Manager role at Northstar Health. Over the last six years, I have led cross-functional product work across healthcare workflows, internal analytics platforms, and customer onboarding experiences. I am especially drawn to Northstar's mission because it combines operational rigor with an obvious human outcome: helping care teams move faster and make better decisions.
+
+In my current role at Lantern Systems, I own a provider scheduling product used by more than 8,000 clinicians across 120 clinics. In the last year, I partnered with design, engineering, and operations to redesign appointment configuration, simplify exception handling, and launch a self-serve admin flow. Those changes reduced average scheduling setup time by 34 percent and lowered support tickets by 22 percent within one quarter. I also built the product narrative used in leadership reviews and translated workflow pain points into a prioritized roadmap with clear tradeoffs.
+
+What stands out to me about this role is the need for a PM who can move comfortably between user research, execution detail, and measurable business outcomes. That is the way I like to work. I regularly interview users, synthesize patterns into problem statements, and align partners on success metrics before development begins. I also care about strong written communication, especially when a team needs clarity across engineering, success, and executive stakeholders.
+
+I would welcome the opportunity to bring that mix of structured thinking, empathy, and delivery focus to Northstar Health. Thank you for your time and consideration.

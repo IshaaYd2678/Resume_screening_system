@@ -1,0 +1,294 @@
+version: '3.9'
+
+services:
+  # ============ PostgreSQL + pgvector ============
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: irss_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/01-pgvector.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - irss_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============ Redis (Broker + Cache) ============
+  redis:
+    image: redis:7-alpine
+    container_name: irss_redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - irss_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============ Ollama (Local LLM) ============
+  ollama:
+    image: ollama/ollama:latest
+    container_name: irss_ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - irss_network
+    environment:
+      - OLLAMA_NUM_PARALLEL=4
+      - OLLAMA_NUM_THREAD=4
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    # Models will be pulled on startup via entrypoint script
+
+  # ============ MinIO (S3-compatible Storage) ============
+  minio:
+    image: minio/minio:latest
+    container_name: irss_minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - irss_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============ FastAPI Backend ============
+  api:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: irss_api
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      REDIS_URL: ${REDIS_URL}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      JWT_EXPIRATION_HOURS: ${JWT_EXPIRATION_HOURS}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      MODEL_PARSE: ${MODEL_PARSE}
+      MODEL_EXPLAIN: ${MODEL_EXPLAIN}
+      MODEL_EMBED: ${MODEL_EMBED}
+      LOG_LEVEL: ${LOG_LEVEL}
+      DEBUG: ${DEBUG}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+      OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    volumes:
+      - ../backend:/app
+    ports:
+      - "8000:8000"
+    networks:
+      - irss_network
+    command: >
+      sh -c "
+        cd /app &&
+        python -m alembic upgrade head &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+
+  # ============ Celery Worker ============
+  worker:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: irss_worker
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      REDIS_URL: ${REDIS_URL}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET_NAME: ${MINIO_BUCKET_NAME}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND}
+      MODEL_PARSE: ${MODEL_PARSE}
+      MODEL_EXPLAIN: ${MODEL_EXPLAIN}
+      MODEL_EMBED: ${MODEL_EMBED}
+      LOG_LEVEL: ${LOG_LEVEL}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+      OTEL_SERVICE_NAME: celery-worker
+    depends_on:
+      - postgres
+      - redis
+      - ollama
+    volumes:
+      - ../backend:/app
+    networks:
+      - irss_network
+    command: celery -A app.tasks worker --loglevel=${LOG_LEVEL} --concurrency=4
+
+  # ============ React Frontend ============
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: irss_frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - irss_network
+    depends_on:
+      - api
+    environment:
+      VITE_API_URL: http://api:8000
+    volumes:
+      - ../frontend/src:/app/src
+
+  # ============ Caddy (Reverse Proxy + HTTPS) ============
+  caddy:
+    image: caddy:2-alpine
+    container_name: irss_caddy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - irss_network
+    depends_on:
+      - api
+      - frontend
+    environment:
+      ACME_AGREE: "true"
+
+  # ============ Prometheus (Metrics) ============
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: irss_prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+    ports:
+      - "9090:9090"
+    networks:
+      - irss_network
+    depends_on:
+      - api
+
+  # ============ Grafana (Dashboards) ============
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: irss_grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3001:3000"
+    networks:
+      - irss_network
+    depends_on:
+      - prometheus
+
+  # ============ Jaeger (Distributed Tracing) ============
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: irss_jaeger
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+    networks:
+      - irss_network
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+
+  # ============ Loki (Log Aggregation) ============
+  loki:
+    image: grafana/loki:latest
+    container_name: irss_loki
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yml
+    ports:
+      - "3100:3100"
+    networks:
+      - irss_network
+
+  # ============ Promtail (Log Collector) ============
+  promtail:
+    image: grafana/promtail:latest
+    container_name: irss_promtail
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - irss_network
+    depends_on:
+      - loki
+
+volumes:
+  postgres_data:
+  redis_data:
+  ollama_data:
+  minio_data:
+  prometheus_data:
+  grafana_data:
+  loki_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  irss_network:
+    driver: bridge

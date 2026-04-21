@@ -1,0 +1,13 @@
+Q4 performance review for Jordan Lee
+
+Jordan stepped into a cross-functional leadership gap during the warehouse migration and coordinated weekly decision reviews across product, engineering, support, and data. The team completed migration for 14 enterprise accounts two weeks ahead of the revised plan.
+
+Jordan redesigned the customer onboarding dashboard and partnered with analytics to instrument activation milestones. The new experience increased day-14 activation from 58 percent to 71 percent and cut onboarding-related support tickets by 19 percent.
+
+Jordan mentored two associate product managers, giving structured feedback on roadmap writing and stakeholder communication. Both teammates now independently run sprint reviews with engineering.
+
+Jordan worked closely with sales enablement to package customer proof points into launch messaging. That effort helped the commercial team close three expansion deals worth $420,000 in annual recurring revenue.
+
+Jordan identified a reporting bottleneck in our finance handoff process and proposed an automated export workflow. After launch, month-end reconciliation time dropped from three days to less than one day.
+
+Jordan also improved operating rhythm by introducing a monthly risk review that gave leadership earlier visibility into delivery blockers and dependency changes.
