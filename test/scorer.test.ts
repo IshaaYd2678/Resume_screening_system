@@ -10,7 +10,12 @@ import {
   parseJobMatchScore,
   parsePerformanceReviewExtraction,
   parsePortfolioScore,
-  parseResumeScore
+  parseResumeScore,
+  extractPerformanceReviewWithGemini,
+  matchResumeWithGemini,
+  scoreCoverLetterWithGemini,
+  scorePortfolioWithGemini,
+  scoreResumeWithGemini
 } from "../lib/scorer";
 
 describe("score prompt builders", () => {
@@ -152,5 +157,45 @@ describe("score JSON parsing", () => {
     expect(coverLetter.wordCount).toBe(318);
     expect(portfolio.sourceType).toBe("url");
     expect(extraction.achievements[0].impactCategory).toBe("quantified");
+  });
+});
+
+describe("local fallback scoring", () => {
+  it("returns a usable resume score without Gemini", async () => {
+    const score = await scoreResumeWithGemini(
+      "Summary\nProduct manager with six years of experience. Experience\nLed onboarding improvements that increased activation by 15 percent. Skills\nSQL, experimentation, analytics, roadmap planning. Education\nB.S. in Computer Science.",
+      "resume"
+    );
+
+    expect(score.documentType).toBe("resume");
+    expect(score.sections).toHaveLength(7);
+    expect(score.overall).toBeGreaterThan(0);
+  });
+
+  it("returns local cover letter, portfolio, match, and extraction results", async () => {
+    const coverLetter = await scoreCoverLetterWithGemini(
+      "I am excited to apply for this product role because your team is improving customer onboarding. I led experiments that improved activation by 15 percent and would welcome the chance to discuss how I can help.",
+      "Looking for a product manager with onboarding, experimentation, analytics, and SQL experience."
+    );
+
+    const portfolio = await scorePortfolioWithGemini(
+      "Project Alpha\nProblem: activation was low.\nProcess: redesigned onboarding.\nOutcome: increased activation by 15 percent.",
+      "url"
+    );
+
+    const match = await matchResumeWithGemini(
+      "Product manager with SQL, analytics, experimentation, and onboarding experience. Increased activation by 15 percent.",
+      "Product manager role requiring SQL, analytics, experimentation, and stakeholder communication.",
+      "resume"
+    );
+
+    const extraction = await extractPerformanceReviewWithGemini(
+      "Led a cross-functional onboarding redesign that increased activation by 15 percent. Mentored two junior PMs and improved planning rituals across the team."
+    );
+
+    expect(coverLetter.wordCount).toBeGreaterThan(0);
+    expect(portfolio.projectCount).toBeGreaterThan(0);
+    expect(match.matchScore).toBeGreaterThan(0);
+    expect(extraction.achievements.length).toBeGreaterThan(0);
   });
 });
