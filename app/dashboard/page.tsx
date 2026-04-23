@@ -90,7 +90,13 @@ export default function DashboardPage() {
     }
 
     const sessionId = window.localStorage.getItem("resumeready-session-id");
-    if (!sessionId) {
+    const storedResumeText =
+      window.localStorage.getItem("resumeready-document-resume") ||
+      window.localStorage.getItem("resumeready-document-linkedin_export") ||
+      "";
+    const storedDocumentType = window.localStorage.getItem("resumeready-active-document-type");
+
+    if (!sessionId && !storedResumeText.trim()) {
       setError("Start with a resume checkup first.");
       return;
     }
@@ -100,7 +106,12 @@ export default function DashboardPage() {
       const response = await fetch("/api/match", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId, jobDescription })
+        body: JSON.stringify({
+          sessionId,
+          jobDescription,
+          resumeText: storedResumeText,
+          documentType: storedDocumentType === "linkedin_export" ? "linkedin_export" : "resume"
+        })
       });
       const body = await response.json();
 

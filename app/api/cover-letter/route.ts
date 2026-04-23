@@ -10,6 +10,8 @@ import { normalizeText } from "@/lib/documents";
 import { parseIncomingDocument, assertScorableDocument } from "@/lib/server/document-workflow";
 import { scoreCoverLetterWithGemini } from "@/lib/scorer";
 
+export const runtime = "nodejs";
+
 function fallbackMessage(error: unknown): string {
   if (error instanceof Error) {
     if (error.message.includes("GEMINI_API_KEY")) {

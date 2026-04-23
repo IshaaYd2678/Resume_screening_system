@@ -9,6 +9,8 @@ import { parseIncomingDocument, assertScorableDocument } from "@/lib/server/docu
 import { extractPerformanceReviewWithGemini } from "@/lib/scorer";
 import type { AchievementsResponse } from "@/lib/types";
 
+export const runtime = "nodejs";
+
 function fallbackMessage(error: unknown): string {
   if (error instanceof Error) {
     if (error.message.includes("GEMINI_API_KEY")) {

@@ -4,6 +4,8 @@ import { matchResumeWithGemini } from "@/lib/scorer";
 import { normalizeText } from "@/lib/documents";
 import type { MatchResponse } from "@/lib/types";
 
+export const runtime = "nodejs";
+
 function fallbackMessage(error: unknown): string {
   if (error instanceof Error) {
     if (error.message.includes("GEMINI_API_KEY")) {
@@ -21,6 +23,8 @@ export async function POST(request: Request) {
     const body = (await request.json()) as {
       sessionId?: string;
       jobDescription?: string;
+      resumeText?: string;
+      documentType?: "resume" | "linkedin_export";
     };
 
     if (!body.sessionId) {
@@ -32,21 +36,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Paste a job description to check role readiness." }, { status: 400 });
     }
 
-    const session = await loadSession(body.sessionId);
-    if (!session) {
-      return NextResponse.json({ error: "Start with a fresh resume checkup." }, { status: 404 });
-    }
+    const directResumeText = normalizeText(body.resumeText ?? "");
+    const directDocumentType = body.documentType === "linkedin_export" ? "linkedin_export" : "resume";
 
-    const resumeText =
-      getLatestDocumentText(session, "resume") || getLatestDocumentText(session, "linkedin_export");
+    let session = body.sessionId ? await loadSession(body.sessionId) : null;
+    const sessionResumeText = session
+      ? getLatestDocumentText(session, "resume") || getLatestDocumentText(session, "linkedin_export")
+      : "";
+    const resumeText = directResumeText || sessionResumeText;
     if (!resumeText) {
       return NextResponse.json({ error: "Upload a resume or LinkedIn export first." }, { status: 400 });
     }
 
-    const documentType = getLatestDocumentText(session, "resume") ? "resume" : "linkedin_export";
+    const documentType = directResumeText
+      ? directDocumentType
+      : session && getLatestDocumentText(session, "resume")
+        ? "resume"
+        : "linkedin_export";
     const match = await matchResumeWithGemini(resumeText, jobDescription, documentType);
-    const savedSession = await appendJobMatch(session, match);
-    const response: MatchResponse = { sessionId: savedSession.id, match };
+    if (session) {
+      session = await appendJobMatch(session, match);
+    }
+
+    const response: MatchResponse = {
+      sessionId: session?.id ?? body.sessionId ?? "local-session",
+      match
+    };
 
     return NextResponse.json(response);
   } catch (error) {

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { parseIncomingDocument } from "@/lib/server/document-workflow";
 import type { DocumentCategory } from "@/lib/types";
 
+export const runtime = "nodejs";
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {

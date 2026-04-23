@@ -16,6 +16,8 @@ import {
 } from "@/lib/scorer";
 import type { DocumentCategory, ScoreResponse } from "@/lib/types";
 
+export const runtime = "nodejs";
+
 type ScoreRouteBody = {
   sessionId?: string;
   documentType?: DocumentCategory;
