@@ -222,11 +222,16 @@ export default function DocumentUploader() {
       };
 
       if (documentType === "cover_letter") {
+        const storedResumeText =
+          window.localStorage.getItem("resumeready-document-resume") ||
+          window.localStorage.getItem("resumeready-document-linkedin_export") ||
+          "";
         endpoint = "/api/cover-letter";
         payload = {
           sessionId,
           coverLetterText: parsedDocument.rawText,
-          fileName: selectedFile?.name
+          fileName: selectedFile?.name,
+          resumeText: storedResumeText || undefined
         };
       }
 

@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       documentType?: "resume" | "linkedin_export";
     };
 
-    if (!body.sessionId) {
+    if (!body.sessionId && !normalizeText(body.resumeText ?? "")) {
       return NextResponse.json({ error: "Start with a resume checkup first." }, { status: 400 });
     }
 

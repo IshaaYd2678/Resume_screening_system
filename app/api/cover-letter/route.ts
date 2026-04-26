@@ -47,6 +47,7 @@ export async function POST(request: Request) {
       fileName?: string;
       fileBase64?: string;
       jobDescription?: string;
+      resumeText?: string;
     };
 
     const parsed = await parseIncomingDocument({
@@ -72,8 +73,10 @@ export async function POST(request: Request) {
       session = await saveCoverLetterScore(session, score);
     }
 
-    const resumeText =
+    const directResumeText = normalizeText(body.resumeText ?? "");
+    const sessionResumeText =
       getLatestDocumentText(session, "resume") || getLatestDocumentText(session, "linkedin_export");
+    const resumeText = directResumeText || sessionResumeText;
     const contradictionFlags = resumeText
       ? collectContradictionFlags(resumeText, parsed.rawText)
       : [];
